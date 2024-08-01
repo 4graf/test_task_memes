@@ -31,3 +31,8 @@ class BaseRepository(ABC, Generic[Entity]):
     @abstractmethod
     async def get_all(self) -> Sequence[Entity]:
         ...
+
+    @abstractmethod
+    async def delete_by_id(self, id_: UUID) -> None:
+        ...
+

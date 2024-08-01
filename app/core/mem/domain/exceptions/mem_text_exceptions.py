@@ -1,5 +1,5 @@
 """
-Исключения для текста мема.
+Исключения для текста мема в доменном слое.
 """
 
 from app.core.mem.domain.exceptions.base_mem_exceptions import MemValidationException
