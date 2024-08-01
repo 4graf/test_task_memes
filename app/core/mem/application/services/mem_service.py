@@ -36,7 +36,7 @@ class MemService:
 
         :param data: Данные для создания мема.
         :return: Информация созданного мема.
-        :raise: MemExistsException, если мем уже существует.
+        :raise MemExistsException: Добавление мема, который уже существует.
         """
 
         mem = Mem(
@@ -56,7 +56,7 @@ class MemService:
 
         :param id_: Уникальный идентификатор мема.
         :return: Информация о меме.
-        :raise: MemNotFoundException, если мем не был найден.
+        :raise MemNotFoundException: Мем не был найден.
         """
         mem = await self.mem_repository.get_by_id(id_)
         if not mem:
@@ -78,7 +78,7 @@ class MemService:
 
         :param data: Данные для обновления мема.
         :return: Информация обновленного мема.
-        :raise: MemExistsException, если мем уже существует.
+        :raise MemExistsException: Добавление мема, который уже существует.
         """
 
         mem = Mem(
