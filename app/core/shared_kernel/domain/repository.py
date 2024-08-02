@@ -13,7 +13,7 @@ Entity = TypeVar("Entity", bound=BaseEntity)
 
 class BaseRepository(ABC, Generic[Entity]):
     """
-        Интерфейс репозитория с CRUD методами.
+    Интерфейс репозитория с CRUD методами.
     """
 
     @abstractmethod

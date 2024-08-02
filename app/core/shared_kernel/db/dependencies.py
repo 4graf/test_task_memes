@@ -1,5 +1,6 @@
 """
 Функции для получения зависимостей базы данных.
+Включает в себя создание асинхронной сессии БД.
 """
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
