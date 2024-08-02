@@ -4,7 +4,7 @@ API-маршруты для работы с мемами.
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from starlette import status
 
 from app.api.http_errors import ResourceNotFoundError, ResourceExistsError, RequestParamValidationError
@@ -25,7 +25,7 @@ mem_router = APIRouter(prefix='/memes', tags=['Mem'])
     status_code=status.HTTP_200_OK,
     response_model=list[MemReadSchema]
 )
-async def get_all_memes(mem_service: Annotated[MemService, get_mem_service()]) -> list[MemReadSchema]:
+async def get_all_memes(mem_service: Annotated[MemService, Depends(get_mem_service)]) -> list[MemReadSchema]:
     """
     Маршрут для получения всех мемов.
 
@@ -42,7 +42,7 @@ async def get_all_memes(mem_service: Annotated[MemService, get_mem_service()]) -
     response_model=MemReadSchema
 )
 async def get_mem_by_id(id: UUID,
-                        mem_service: Annotated[MemService, get_mem_service()]) -> MemReadSchema:
+                        mem_service: Annotated[MemService, Depends(get_mem_service)]) -> MemReadSchema:
     """
     Маршрут для получения мема по его идентификатору.
 
@@ -63,7 +63,7 @@ async def get_mem_by_id(id: UUID,
     response_model=MemReadSchema
 )
 async def add_mem(mem_to_add: MemCreateSchema,
-                  mem_service: Annotated[MemService, get_mem_service()]) -> MemReadSchema:
+                  mem_service: Annotated[MemService, Depends(get_mem_service)]) -> MemReadSchema:
     """
     Маршрут для добавления мема.
 
@@ -87,7 +87,7 @@ async def add_mem(mem_to_add: MemCreateSchema,
 )
 async def update_mem(id: UUID,
                      mem_to_update: MemUpdateRequest,
-                     mem_service: Annotated[MemService, get_mem_service()]) -> MemReadSchema:
+                     mem_service: Annotated[MemService, Depends(get_mem_service)]) -> MemReadSchema:
     """
     Маршрут для обновления мема по его идентификатору.
 
@@ -112,7 +112,7 @@ async def update_mem(id: UUID,
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_mem_by_id(id: UUID,
-                           mem_service: Annotated[MemService, get_mem_service()]) -> None:
+                           mem_service: Annotated[MemService, Depends(get_mem_service)]) -> None:
     """
     Маршрут для удаления мема по его идентификатору.
 

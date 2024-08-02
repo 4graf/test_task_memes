@@ -14,3 +14,17 @@ class EntityExistsException(Exception):
         :param msg: Сообщение исключения.
         """
         super().__init__(msg)
+
+
+class EntityNotFoundException(Exception):
+    """
+    Исключение, возникающее при ненахождении сущности.
+    """
+    def __init__(self, msg='Сущность не найдена.'):
+        """
+        Конструктор EntityNotFoundException.
+
+        :param msg: Сообщение исключения.
+        """
+        super().__init__(msg)
+

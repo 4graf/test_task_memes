@@ -11,7 +11,7 @@ from sqlalchemy.exc import NoResultFound, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.shared_kernel.db.dao import BaseDao
-from app.core.shared_kernel.db.exceptions import EntityExistsException
+from app.core.shared_kernel.db.exceptions import EntityExistsException, EntityNotFoundException
 from app.core.shared_kernel.domain.entity import BaseEntity
 from app.core.shared_kernel.domain.repository import BaseRepository
 
@@ -86,6 +86,8 @@ class BaseDBRepository(BaseRepository[Entity], ABC):
             result = await self.session.execute(stmt)
             result = result.scalar_one()
             await self.session.commit()
+        except NoResultFound as e:
+            raise EntityNotFoundException from e
         except IntegrityError as e:
             raise EntityExistsException from e
         return result.to_entity()
@@ -138,5 +140,7 @@ class BaseDBRepository(BaseRepository[Entity], ABC):
             .filter_by(id=id_)
         )
 
-        await self.session.execute(stmt)
+        result = await self.session.execute(stmt)
+        if not result.rowcount:
+            raise EntityNotFoundException
         await self.session.commit()
