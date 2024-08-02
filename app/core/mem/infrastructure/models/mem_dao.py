@@ -17,12 +17,12 @@ class MemDao(BaseDao):
     """
     Модель DAO для работы с мемами в базе данных.
 
-    :cvar __table__: Название таблицы для объекта :class:`sqlalchemy.schema.Table`.
+    :cvar __tablename__: Название таблицы в базе данных.
     :cvar id: Уникальный идентификатор мема, первичный ключ.
     :cvar text: Текст мема
     """
 
-    __table__ = "memes"
+    __tablename__ = "memes"
 
     id: MappedColumn[UUID] = mapped_column(primary_key=True)
     text: MappedColumn[str] = mapped_column(String)
