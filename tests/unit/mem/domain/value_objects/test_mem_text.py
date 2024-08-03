@@ -4,8 +4,8 @@
 
 import pytest
 
-from app.core.mem.domain.exceptions.mem_text_exceptions import MinLengthMemTextError, MaxLengthMemTextError, \
-    MemTextTypeError
+from app.core.mem.domain.exceptions.base_mem_exceptions import MemTypeError
+from app.core.mem.domain.exceptions.mem_text_exceptions import MinLengthMemTextError, MaxLengthMemTextError
 from app.core.mem.domain.value_objects.mem_text import MemText
 
 
@@ -34,7 +34,7 @@ class TestMemText:
         Проверяет выбрасывание исключения при попытке передачи некорректного типа данных для текста мема.
         """
         text = 322
-        with pytest.raises(MemTextTypeError):
+        with pytest.raises(MemTypeError):
             MemText(text=text)
 
     def test_text_length_less_than_minimum(self):

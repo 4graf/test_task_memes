@@ -1,5 +1,5 @@
 """
-Юнит-тесты домена Mem.
+Юнит-тесты сущности Mem.
 """
 
 from uuid import UUID
@@ -18,8 +18,8 @@ class TestMem:
         """
         Проверяет корректное создание сущности мема.
         """
-        mem = Mem(text=MemText('Колобок повесился.'),
-                  uuid=MemUUID(UUID('777a3f52-ce9a-4758-a4d4-881221f94f63')))
+        mem = Mem(uuid=MemUUID(UUID('777a3f52-ce9a-4758-a4d4-881221f94f63')),
+                  text=MemText('Колобок повесился.'))
 
         assert mem.text == MemText('Колобок повесился.')
         assert mem.uuid == MemUUID(UUID('777a3f52-ce9a-4758-a4d4-881221f94f63'))

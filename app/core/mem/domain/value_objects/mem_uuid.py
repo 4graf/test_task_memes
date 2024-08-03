@@ -5,7 +5,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from app.core.mem.domain.exceptions.mem_text_exceptions import MemTextTypeError
+from app.core.mem.domain.exceptions.base_mem_exceptions import MemTypeError
 
 
 @dataclass(slots=True)
@@ -23,4 +23,4 @@ class MemUUID:
         Проверяет идентификатор на тип данных
         """
         if not isinstance(self.uuid, UUID):
-            raise MemTextTypeError(extra_msg_exception='Идентификатор мема должен быть типом `UUID`')
+            raise MemTypeError(extra_msg_exception='Идентификатор мема должен быть типом `UUID`')

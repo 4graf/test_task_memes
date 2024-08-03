@@ -6,7 +6,7 @@ from uuid import UUID
 
 import pytest
 
-from app.core.mem.domain.exceptions.mem_text_exceptions import MemTextTypeError
+from app.core.mem.domain.exceptions.base_mem_exceptions import MemTypeError
 from app.core.mem.domain.value_objects.mem_uuid import MemUUID
 
 
@@ -28,7 +28,7 @@ class TestMemUUID:
         Проверяет выбрасывание исключения при попытке передачи некорректного типа данных для идентификатора мема.
         """
         uuid = '777a'
-        with pytest.raises(MemTextTypeError):
+        with pytest.raises(MemTypeError):
             MemUUID(uuid=uuid)
 
     def test_memuuids_equality(self):

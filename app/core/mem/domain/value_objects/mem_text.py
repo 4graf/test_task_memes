@@ -4,8 +4,8 @@
 
 from dataclasses import dataclass
 
-from app.core.mem.domain.exceptions.mem_text_exceptions import MinLengthMemTextError, MaxLengthMemTextError, \
-    MemTextTypeError
+from app.core.mem.domain.exceptions.base_mem_exceptions import MemTypeError
+from app.core.mem.domain.exceptions.mem_text_exceptions import MinLengthMemTextError, MaxLengthMemTextError
 
 
 @dataclass(slots=True)
@@ -23,7 +23,7 @@ class MemText:
         Проверяет текст на тип данных и длину
         """
         if not isinstance(self.text, str):
-            raise MemTextTypeError(extra_msg_exception='Текст мема должен быть типом `str`')
+            raise MemTypeError(extra_msg_exception='Текст мема должен быть типом `str`')
         if len(self.text) < 5:
             raise MinLengthMemTextError
         if len(self.text) > 500:

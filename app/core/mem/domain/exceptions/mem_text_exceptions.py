@@ -35,19 +35,3 @@ class MaxLengthMemTextError(MemValidationException):
         if max_length:
             msg = f'{msg} [{max_length}]'
         super().__init__(msg)
-
-
-class MemTextTypeError(MemValidationException):
-    """
-    Исключение, возникающее при несоответствии типа данных.
-    """
-    def __init__(self, msg: str = 'Ошибка валидации', extra_msg_exception: str = None):
-        """
-        Конструктор MemTextTypeError.
-
-        :param msg: Сообщение исключения.
-        :param extra_msg_exception: Дополнительное сообщение исключения.
-        """
-        if extra_msg_exception:
-            msg = f'{msg}: {extra_msg_exception}'
-        super().__init__(msg)
