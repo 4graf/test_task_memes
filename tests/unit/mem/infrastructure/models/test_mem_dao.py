@@ -15,6 +15,9 @@ class TestMemDao:
     """
 
     def test_to_dict_should_create_dict_with_columns_name_and_values(self):
+        """
+        Проверяет создание словаря из DAO мема, где ключ - название столбца, а значение - его значение столбца.
+        """
         mem_dao = MemDao(id=UUID('777a3f52-ce9a-4758-a4d4-881221f94f63'),
                          text='Колобок повесился.')
 
@@ -22,6 +25,9 @@ class TestMemDao:
                                      'text': 'Колобок повесился.'}
 
     def test_to_entity_should_create_entity_instance(self):
+        """
+        Проверяет создание сущности мема из DAO мема.
+        """
         mem_dao = MemDao(id=UUID('777a3f52-ce9a-4758-a4d4-881221f94f63'),
                          text='Колобок повесился.')
         mem = mem_dao.to_entity()
@@ -30,6 +36,9 @@ class TestMemDao:
         assert mem.text == MemText('Колобок повесился.')
 
     def test_from_entity_should_create_dao_instance(self):
+        """
+        Проверяет создание DAO мема из сущности мема.
+        """
         mem = Mem(uuid=MemUUID(UUID('777a3f52-ce9a-4758-a4d4-881221f94f63')),
                   text=MemText('Колобок повесился.'))
         mem_dao = MemDao.from_entity(mem)
