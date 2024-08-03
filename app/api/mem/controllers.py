@@ -102,6 +102,8 @@ async def update_mem(id: UUID,
         updated_mem = await mem_service.update_mem(mem_to_update_internal)
     except MemValidationException as exc:
         raise RequestParamValidationError(exception_msg=str(exc)) from exc
+    except MemNotFoundException as exc:
+        raise ResourceNotFoundError(exception_msg=str(exc)) from exc
     except MemExistsException as exc:
         raise ResourceExistsError(exception_msg=str(exc)) from exc
     return updated_mem
@@ -119,4 +121,9 @@ async def delete_mem_by_id(id: UUID,
     :param id: Уникальный идентификатор мема.
     :param mem_service: Сервис для работы с мемами.
     """
-    await mem_service.delete_mem_by_id(id)
+    try:
+        await mem_service.delete_mem_by_id(id)
+    except MemValidationException as exc:
+        raise RequestParamValidationError(exception_msg=str(exc)) from exc
+    except MemNotFoundException as exc:
+        raise ResourceNotFoundError(exception_msg=str(exc)) from exc

@@ -12,7 +12,7 @@ from app.core.mem.domain.mem_entity import Mem
 from app.core.mem.domain.mem_repository import MemRepository
 from app.core.mem.domain.value_objects.mem_text import MemText
 from app.core.mem.domain.value_objects.mem_uuid import MemUUID
-from app.core.shared_kernel.db.exceptions import EntityExistsException
+from app.core.shared_kernel.db.exceptions import EntityExistsException, EntityNotFoundException
 
 
 class MemService:
@@ -87,6 +87,8 @@ class MemService:
         )
         try:
             await self.mem_repository.update(mem)
+        except EntityNotFoundException as e:
+            raise MemNotFoundException from e
         except EntityExistsException as e:
             raise MemExistsException from e
 
@@ -99,4 +101,7 @@ class MemService:
         :param id_: Уникальный идентификатор мема.
         """
 
-        await self.mem_repository.delete_by_id(id_)
+        try:
+            await self.mem_repository.delete_by_id(id_)
+        except EntityNotFoundException as e:
+            raise MemNotFoundException from e
