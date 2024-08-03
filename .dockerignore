@@ -1,0 +1,11 @@
+.env*
+*.md
+venv
+tests
+*pytest*
+requirements.dev.txt
+
+.git
+.gitignore
+
+.dockerignore
