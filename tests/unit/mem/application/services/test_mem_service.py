@@ -4,6 +4,9 @@
 from unittest.mock import MagicMock
 from uuid import UUID
 
+import pytest
+
+from app.core.mem.application.exceptions import MemNotFoundException
 from app.core.mem.application.schemas.mem_create_schema import MemCreateSchema
 from app.core.mem.application.schemas.mem_read_schema import MemReadSchema
 from app.core.mem.application.schemas.mem_update_schema import MemUpdateSchema
@@ -12,6 +15,7 @@ from app.core.mem.domain.mem_entity import Mem
 from app.core.mem.domain.value_objects.mem_text import MemText
 from app.core.mem.domain.value_objects.mem_uuid import MemUUID
 from app.core.mem.infrastructure.models.mem_dao import MemDao
+from app.core.shared_kernel.db.exceptions import EntityNotFoundException
 from tests.unit.mem.application.conftest import get_mock_mem_repository
 
 
@@ -88,3 +92,14 @@ class TestMemService:
         assert isinstance(updated_mem, MemReadSchema)
         assert updated_mem.uuid == UUID('777a3f52-ce9a-4758-a4d4-881221f94f63')
         assert updated_mem.text == 'Колобок повесился.'
+
+    async def test_delete_not_exists_mem_should_raise_exception(self):
+        """
+        Проверяет обновление мема через сервис и возвращение обновлённого мема.
+        """
+        mock_mem_repository = get_mock_mem_repository()
+        mock_mem_repository.delete_by_id.side_effect = EntityNotFoundException
+
+        mem_service = MemService(mock_mem_repository)
+        with pytest.raises(MemNotFoundException):
+            await mem_service.delete_mem_by_id(UUID('777a3f52-ce9a-4758-a4d4-881221f94f63'))
