@@ -9,7 +9,7 @@ from app.core.mem.domain.value_objects.mem_uuid import MemUUID
 from app.core.shared_kernel.domain.entity import BaseEntity
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, eq=False)
 class Mem(BaseEntity):
     """
     Представляет сущность мема и его бизнес-логику.
@@ -17,5 +17,6 @@ class Mem(BaseEntity):
     :cvar uuid: Уникальный идентификатор мема.
     :cvar text: Текст мема.
     """
+
     uuid: MemUUID
     text: MemText
