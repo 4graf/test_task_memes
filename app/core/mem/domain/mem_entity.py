@@ -24,9 +24,7 @@ class Mem(BaseEntity):
     text: MemText
     image_path: ImagePath | None = None
 
-    def __init__(self, uuid: MemUUID, text: MemText, image_path: ImagePath = None):
-        self.uuid = uuid
-        self.text = text
+    def upload_image(self, image_path: ImagePath = None):
         if not image_path:
-            image_path = ImagePath(path=str(self.uuid.uuid))
+            image_path = ImagePath(path=f'mem_{self.uuid.uuid}')
         self.image_path = image_path

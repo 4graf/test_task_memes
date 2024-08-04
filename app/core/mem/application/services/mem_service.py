@@ -11,7 +11,6 @@ from app.core.mem.application.schemas.mem_update_schema import MemUpdateSchema
 from app.core.mem.domain.image_repository import ImageRepository
 from app.core.mem.domain.mem_entity import Mem
 from app.core.mem.domain.mem_repository import MemRepository
-from app.core.mem.domain.value_objects.image_path import ImagePath
 from app.core.mem.domain.value_objects.mem_text import MemText
 from app.core.mem.domain.value_objects.mem_uuid import MemUUID
 from app.core.shared_kernel.db.exceptions import EntityExistsException, EntityNotFoundException
@@ -34,7 +33,7 @@ class MemService:
         self.mem_repository = mem_repository
         self.image_repository = image_repository
 
-    async def add_mem(self, data: MemCreateSchema, image_stream: BytesIO | None) -> MemReadSchema:
+    async def add_mem(self, data: MemCreateSchema, image_stream: BytesIO = None) -> MemReadSchema:
         """
         Добавляет новый мем.
 
@@ -47,12 +46,13 @@ class MemService:
             uuid=MemUUID(uuid4()),
             text=MemText(data.text)
         )
+        if image_stream:
+            mem.upload_image()
+            self.image_repository.save_image(path=mem.image_path.path, image_stream=image_stream)
         try:
             await self.mem_repository.add(mem)
         except EntityExistsException as e:
             raise MemExistsException from e
-
-        self.image_repository.save_image(path=mem.image_path.path, image_stream=image_stream)
 
         return MemReadSchema.from_entity(mem)
 
@@ -89,29 +89,35 @@ class MemService:
         memes = await self.mem_repository.get_all()
         return [MemReadSchema.from_entity(mem) for mem in memes]
 
-    async def update_mem(self, data: MemUpdateSchema) -> MemReadSchema:
+    async def update_mem(self, data: MemUpdateSchema, image_stream: BytesIO = None) -> MemReadSchema:
         """
         Обновляет мем.
 
         :param data: Данные для обновления мема.
+        :param image_stream: Двоичный поток с данными изображения.
         :return: Информация обновленного мема.
         :raise MemExistsException: Добавление мема, который уже существует.
         """
-        image_path = ImagePath(data.image_path) if data.image_path else None
-
-        mem = Mem(
+        new_mem = Mem(
             uuid=MemUUID(data.uuid),
-            text=MemText(data.text),
-            image_path=image_path
+            text=MemText(data.text)
         )
+        if image_stream:
+            old_mem = await self.mem_repository.get_by_id(data.uuid)
+            if old_mem.image_path:
+                self.image_repository.delete_image(old_mem.image_path.path)
+
+            new_mem.upload_image()
+            self.image_repository.save_image(path=new_mem.image_path.path, image_stream=image_stream)
+
         try:
-            await self.mem_repository.update(mem)
+            await self.mem_repository.update(new_mem)
         except EntityNotFoundException as e:
             raise MemNotFoundException from e
         except EntityExistsException as e:
             raise MemExistsException from e
 
-        return MemReadSchema.from_entity(mem)
+        return MemReadSchema.from_entity(new_mem)
 
     async def delete_mem_by_id(self, id_: UUID) -> None:
         """
@@ -121,6 +127,8 @@ class MemService:
         """
 
         try:
+            mem = await self.mem_repository.get_by_id(id_)
             await self.mem_repository.delete_by_id(id_)
+            self.image_repository.delete_image(mem.image_path.path)
         except EntityNotFoundException as e:
             raise MemNotFoundException from e

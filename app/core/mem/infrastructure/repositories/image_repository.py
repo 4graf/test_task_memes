@@ -20,10 +20,9 @@ class ImageS3Repository(ImageRepository):
         """
         Конструктор ImageS3Repository.
 
-        :param client: Клиент для работы с S3 хранилищем.
+        :param bucket: Бакет для работы с изображениями в S3 хранилище.
         """
 
-        # self.client = client
         self.bucket = bucket
         self.bucket_name = settings.bucket_name
 
@@ -34,7 +33,6 @@ class ImageS3Repository(ImageRepository):
         :param path: Путь для изображения.
         :param image_stream: Двоичный поток с данными изображения.
         """
-        # self.client.upload_fileobj(Fileobj=image_stream, Bucket=self.bucket_name, Key=path)
         self.bucket.upload_fileobj(Fileobj=image_stream, Key=path)
 
     def get_image(self, path: str) -> BytesIO:
@@ -43,11 +41,6 @@ class ImageS3Repository(ImageRepository):
         :param path: Путь для изображения.
         :return: Двоичный поток с данными изображения.
         """
-        # self.client.download_fileobj(Bucket=)
-        # with BytesIO() as image_stream:
-        #     self.bucket.download_fileobj(Key=path, Fileobj=image_stream)
-        #     image_stream.seek(0)
-        #     return image_stream
         image_stream = BytesIO()
         self.bucket.download_fileobj(Key=path, Fileobj=image_stream)
         image_stream.seek(0)
@@ -58,4 +51,10 @@ class ImageS3Repository(ImageRepository):
         Удаляет изображение из хранилища.
         :param path: Путь для изображения.
         """
-        ...
+        self.bucket.delete_objects(Delete={
+            'Objects': [
+                {
+                    'Key': path
+                }
+            ]
+        })

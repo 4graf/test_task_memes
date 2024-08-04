@@ -58,12 +58,14 @@ async def get_mem_by_id(id: UUID,
         mem = await mem_service.get_mem_by_id(id)
         if mem.image_path:
             with await mem_service.get_mem_image(mem.image_path) as image_stream:
-                image_bytes = image_stream.getvalue()
+                image_bytes = base64.b64encode(image_stream.getvalue())
+        else:
+            image_bytes = None
     except MemNotFoundException as exc:
         raise ResourceNotFoundError(exception_msg=str(exc)) from exc
 
     response_mem = MemReadResponse(mem=mem,
-                                   image_bytes=base64.b64encode(image_bytes))
+                                   image_bytes=image_bytes)
     return response_mem
 
 
@@ -109,11 +111,14 @@ async def add_mem(mem_to_add: Annotated[MemCreateSchema, Depends()],
     :return: Добавленный мем.
     """
     # Проверку на размер файла надо бы иметь на веб-сервере
-    if image_file.size > 8 * 2**20:
-        raise RequestParamValidationError(
-            exception_msg='Изображение слишком большое. Поддерживаются изображения до 8 Мб.'
-        )
-    image_stream = BytesIO(await image_file.read())
+    if image_file:
+        if image_file.size > 8 * 2**20:
+            raise RequestParamValidationError(
+                exception_msg='Изображение слишком большое. Поддерживаются изображения до 8 Мб.'
+            )
+        image_stream = BytesIO(await image_file.read())
+    else:
+        image_stream = None
 
     try:
         added_mem = await mem_service.add_mem(mem_to_add, image_stream)
@@ -130,20 +135,32 @@ async def add_mem(mem_to_add: Annotated[MemCreateSchema, Depends()],
     response_model=MemReadSchema
 )
 async def update_mem(id: UUID,
-                     mem_to_update: MemUpdateRequest,
-                     mem_service: Annotated[MemService, Depends(get_mem_service)]) -> MemReadSchema:
+                     mem_to_update: Annotated[MemUpdateRequest, Depends()],
+                     mem_service: Annotated[MemService, Depends(get_mem_service)],
+                     image_file: UploadFile = None) -> MemReadSchema:
     """
     Маршрут для обновления мема по его идентификатору.
 
     :param id: Уникальный идентификатор мема.
     :param mem_to_update: Новая информация о меме.
     :param mem_service: Сервис для работы с мемами.
+    :param image_file: Картинка мема.
     :return: Обновлённый мем.
     """
+    # Проверку на размер файла надо бы иметь на веб-сервере
+    if image_file:
+        if image_file.size > 8 * 2**20:
+            raise RequestParamValidationError(
+                exception_msg='Изображение слишком большое. Поддерживаются изображения до 8 Мб.'
+            )
+        image_stream = BytesIO(await image_file.read())
+    else:
+        image_stream = None
+
     try:
         mem_to_update_internal = MemUpdateSchema(uuid=id,
                                                  text=mem_to_update.text)
-        updated_mem = await mem_service.update_mem(mem_to_update_internal)
+        updated_mem = await mem_service.update_mem(mem_to_update_internal, image_stream)
     except MemValidationException as exc:
         raise RequestParamValidationError(exception_msg=str(exc)) from exc
     except MemNotFoundException as exc:
