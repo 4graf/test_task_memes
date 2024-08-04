@@ -12,6 +12,7 @@ from app.core.mem.application.schemas.mem_read_schema import MemReadSchema
 from app.core.mem.application.schemas.mem_update_schema import MemUpdateSchema
 from app.core.mem.application.services.mem_service import MemService
 from app.core.mem.domain.mem_entity import Mem
+from app.core.mem.domain.utils.mem_filter_params import MemFilterParams
 from app.core.mem.domain.value_objects.image_path import ImagePath
 from app.core.mem.domain.value_objects.mem_text import MemText
 from app.core.mem.domain.value_objects.mem_uuid import MemUUID
@@ -106,7 +107,8 @@ class TestMemService:
         mock_image_repository = get_mock_image_repository()
 
         mem_service = MemService(mock_mem_repository, mock_image_repository)
-        memes = await mem_service.get_all_memes()
+        mem_filter_params = MemFilterParams(page=1, per_page=2)
+        memes = await mem_service.get_all_memes(mem_filter_params=mem_filter_params)
 
         assert isinstance(memes, list)
         for mem, mock_mem in zip(memes, mock_memes):

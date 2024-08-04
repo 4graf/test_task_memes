@@ -20,6 +20,7 @@ from app.core.mem.application.schemas.mem_read_schema import MemReadSchema
 from app.core.mem.application.schemas.mem_update_schema import MemUpdateSchema
 from app.core.mem.application.services.mem_service import MemService
 from app.core.mem.domain.exceptions.base_mem_exceptions import MemValidationException
+from app.core.mem.domain.utils.mem_filter_params import MemFilterParams
 
 mem_router = APIRouter(prefix='/memes', tags=['Mem'])
 
@@ -29,14 +30,16 @@ mem_router = APIRouter(prefix='/memes', tags=['Mem'])
     status_code=status.HTTP_200_OK,
     response_model=list[MemReadSchema]
 )
-async def get_all_memes(mem_service: Annotated[MemService, Depends(get_mem_service)]) -> list[MemReadSchema]:
+async def get_all_memes(mem_service: Annotated[MemService, Depends(get_mem_service)],
+                        mem_filter_params: MemFilterParams = Depends()) -> list[MemReadSchema]:
     """
     Маршрут для получения всех мемов.
 
+    :param mem_filter_params: Параметры фильтрации мемов.
     :param mem_service: Сервис для работы с мемами.
     :return: Список мемов.
     """
-    memes = await mem_service.get_all_memes()
+    memes = await mem_service.get_all_memes(mem_filter_params=mem_filter_params)
     return memes
 
 

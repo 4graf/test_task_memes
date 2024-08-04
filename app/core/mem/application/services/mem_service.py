@@ -11,6 +11,7 @@ from app.core.mem.application.schemas.mem_update_schema import MemUpdateSchema
 from app.core.mem.domain.image_repository import ImageRepository
 from app.core.mem.domain.mem_entity import Mem
 from app.core.mem.domain.mem_repository import MemRepository
+from app.core.mem.domain.utils.mem_filter_params import MemFilterParams
 from app.core.mem.domain.value_objects.mem_text import MemText
 from app.core.mem.domain.value_objects.mem_uuid import MemUUID
 from app.core.shared_kernel.db.exceptions import EntityExistsException, EntityNotFoundException
@@ -80,13 +81,13 @@ class MemService:
 
         return self.image_repository.get_image(path=path)
 
-    async def get_all_memes(self) -> list[MemReadSchema]:
+    async def get_all_memes(self, mem_filter_params: MemFilterParams) -> list[MemReadSchema]:
         """
         Получает информацию о меме по его идентификатору.
 
         :return: Список с информациями о мемах.
         """
-        memes = await self.mem_repository.get_all()
+        memes = await self.mem_repository.get_by_filter(mem_filter_params=mem_filter_params)
         return [MemReadSchema.from_entity(mem) for mem in memes]
 
     async def update_mem(self, data: MemUpdateSchema, image_stream: BytesIO = None) -> MemReadSchema:
@@ -102,15 +103,15 @@ class MemService:
             uuid=MemUUID(data.uuid),
             text=MemText(data.text)
         )
-        if image_stream:
+        try:
             old_mem = await self.mem_repository.get_by_id(data.uuid)
             if old_mem.image_path:
                 self.image_repository.delete_image(old_mem.image_path.path)
 
-            new_mem.upload_image()
-            self.image_repository.save_image(path=new_mem.image_path.path, image_stream=image_stream)
+            if image_stream:
+                new_mem.upload_image()
+                self.image_repository.save_image(path=new_mem.image_path.path, image_stream=image_stream)
 
-        try:
             await self.mem_repository.update(new_mem)
         except EntityNotFoundException as e:
             raise MemNotFoundException from e
@@ -129,6 +130,7 @@ class MemService:
         try:
             mem = await self.mem_repository.get_by_id(id_)
             await self.mem_repository.delete_by_id(id_)
-            self.image_repository.delete_image(mem.image_path.path)
+            if mem.image_path:
+                self.image_repository.delete_image(mem.image_path.path)
         except EntityNotFoundException as e:
             raise MemNotFoundException from e
