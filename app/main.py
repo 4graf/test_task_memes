@@ -4,7 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from app.api.api import api_routers
-
+from app.core.helpers.creation_helper import CreationHelper
 
 app = FastAPI()
 
@@ -13,6 +13,7 @@ for api_router in api_routers:
 
 
 async def main():
+    CreationHelper.create_image_bucket()
     uvicorn.run(app="main:app", host='0.0.0.0', port=3000, reload=True)
 
 

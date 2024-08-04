@@ -4,6 +4,7 @@
 
 from dataclasses import dataclass
 
+from app.core.mem.domain.value_objects.image_path import ImagePath
 from app.core.mem.domain.value_objects.mem_text import MemText
 from app.core.mem.domain.value_objects.mem_uuid import MemUUID
 from app.core.shared_kernel.domain.entity import BaseEntity
@@ -16,7 +17,14 @@ class Mem(BaseEntity):
 
     :cvar uuid: Уникальный идентификатор мема.
     :cvar text: Текст мема.
+    :cvar image_path: Путь к изображению мема в S3 хранилище.
     """
 
     uuid: MemUUID
     text: MemText
+    image_path: ImagePath | None = None
+
+    def upload_image(self, image_path: ImagePath = None):
+        if not image_path:
+            image_path = ImagePath(path=f'mem_{self.uuid.uuid}')
+        self.image_path = image_path
