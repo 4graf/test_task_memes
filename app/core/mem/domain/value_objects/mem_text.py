@@ -25,6 +25,6 @@ class MemText:
         if not isinstance(self.text, str):
             raise MemTypeError(extra_msg_exception='Текст мема должен быть типом `str`')
         if len(self.text) < 5:
-            raise MinLengthMemTextError
+            raise MinLengthMemTextError(min_length=5)
         if len(self.text) > 500:
-            raise MaxLengthMemTextError
+            raise MaxLengthMemTextError(max_length=500)
