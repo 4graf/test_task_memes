@@ -1,10 +1,11 @@
 """
 API-маршруты для работы с мемами.
 """
+from io import BytesIO
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile
 from starlette import status
 
 from app.api.http_errors import ResourceNotFoundError, ResourceExistsError, RequestParamValidationError
@@ -62,17 +63,24 @@ async def get_mem_by_id(id: UUID,
     status_code=status.HTTP_201_CREATED,
     response_model=MemReadSchema
 )
-async def add_mem(mem_to_add: MemCreateSchema,
-                  mem_service: Annotated[MemService, Depends(get_mem_service)]) -> MemReadSchema:
+async def add_mem(mem_to_add: Annotated[MemCreateSchema, Depends()],
+                  mem_service: Annotated[MemService, Depends(get_mem_service)],
+                  image_file: UploadFile = None) -> MemReadSchema:
     """
     Маршрут для добавления мема.
 
-    :param mem_to_add: Информация о меме.
     :param mem_service: Сервис для работы с мемами.
+    :param mem_to_add: Информация о меме.
+    :param image_file: Картинка мема.
     :return: Добавленный мем.
     """
+    if image_file.size > 8 * 2**20:
+        raise RequestParamValidationError(
+            exception_msg='Изображение слишком большое. Поддерживаются изображения до 8 Мб.'
+        )
+    image_stream = BytesIO(await image_file.read())
     try:
-        added_mem = await mem_service.add_mem(mem_to_add)
+        added_mem = await mem_service.add_mem(mem_to_add, image_stream)
     except MemValidationException as exc:
         raise RequestParamValidationError(exception_msg=str(exc)) from exc
     except MemExistsException as exc:
