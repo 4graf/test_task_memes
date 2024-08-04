@@ -34,7 +34,7 @@ class MemService:
         self.mem_repository = mem_repository
         self.image_repository = image_repository
 
-    async def add_mem(self, data: MemCreateSchema, image_stream: BytesIO) -> MemReadSchema:
+    async def add_mem(self, data: MemCreateSchema, image_stream: BytesIO | None) -> MemReadSchema:
         """
         Добавляет новый мем.
 
@@ -43,19 +43,16 @@ class MemService:
         :return: Информация созданного мема.
         :raise MemExistsException: Добавление мема, который уже существует.
         """
-        image_path = ImagePath(data.image_path) if data.image_path else None
-
         mem = Mem(
             uuid=MemUUID(uuid4()),
-            text=MemText(data.text),
-            image_path=image_path
+            text=MemText(data.text)
         )
         try:
             await self.mem_repository.add(mem)
         except EntityExistsException as e:
             raise MemExistsException from e
 
-        self.image_repository.save_image(path=data.image_path, image_stream=image_stream)
+        self.image_repository.save_image(path=mem.image_path.path, image_stream=image_stream)
 
         return MemReadSchema.from_entity(mem)
 
@@ -70,9 +67,18 @@ class MemService:
         mem = await self.mem_repository.get_by_id(id_)
         if not mem:
             raise MemNotFoundException
-        # self.image_repository.get_image(path=mem.image_path.path)
 
         return MemReadSchema.from_entity(mem)
+
+    async def get_mem_image(self, path: str) -> BytesIO:
+        """
+        Получает картинку меме по пути.
+
+        :param path: Путь к картинке мема.
+        :return: Бинарный поток с картинкой мема.
+        """
+
+        return self.image_repository.get_image(path=path)
 
     async def get_all_memes(self) -> list[MemReadSchema]:
         """

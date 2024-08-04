@@ -44,9 +44,14 @@ class ImageS3Repository(ImageRepository):
         :return: Двоичный поток с данными изображения.
         """
         # self.client.download_fileobj(Bucket=)
-        with BytesIO() as image_stream:
-            self.bucket.download_fileobj(Key=path, Fileobj=image_stream)
-            return image_stream
+        # with BytesIO() as image_stream:
+        #     self.bucket.download_fileobj(Key=path, Fileobj=image_stream)
+        #     image_stream.seek(0)
+        #     return image_stream
+        image_stream = BytesIO()
+        self.bucket.download_fileobj(Key=path, Fileobj=image_stream)
+        image_stream.seek(0)
+        return image_stream
 
     def delete_image(self, path: str) -> None:
         """

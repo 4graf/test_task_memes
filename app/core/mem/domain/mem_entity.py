@@ -23,3 +23,10 @@ class Mem(BaseEntity):
     uuid: MemUUID
     text: MemText
     image_path: ImagePath | None = None
+
+    def __init__(self, uuid: MemUUID, text: MemText, image_path: ImagePath = None):
+        self.uuid = uuid
+        self.text = text
+        if not image_path:
+            image_path = ImagePath(path=str(self.uuid.uuid))
+        self.image_path = image_path
