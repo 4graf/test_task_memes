@@ -50,7 +50,7 @@
 6. Обновить базу данных миграциями с помощью команды `alembic upgrade head`
 7. Запустить проект командой `python main.py`
 
-## Запуск микросервисов через Docker Compose
+## Запуск через Docker Compose
 
 1. Создать файл `.env` с перечисленными переменными окружения
 2. Запустить сборку командой `docker compose -f docker-compose.yml up`
