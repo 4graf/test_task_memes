@@ -93,8 +93,6 @@ class UserService:
         :raise UserExistsException: Добавление пользователя, который уже существует.
         """
         try:
-            old_user = await self.user_repository.get_by_id(data.uuid)
-
             user = User(
                 uuid=UserUUID(data.uuid),
                 login=Login(data.login),
@@ -102,7 +100,7 @@ class UserService:
                 email=Email(data.email),
                 name=UserName(first_name=data.name.first_name,
                               second_name=data.name.second_name),
-                role=old_user.role
+                role=data.role
             )
             await self.user_repository.update(user)
         except EntityNotFoundException as e:
