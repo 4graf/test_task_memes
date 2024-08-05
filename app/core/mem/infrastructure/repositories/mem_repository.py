@@ -23,6 +23,12 @@ class MemDBRepository(MemRepository, BaseDBRepository[Mem]):
         return MemDao
 
     async def get_by_filter(self, mem_filter_params: MemFilterParams) -> list[Mem]:
+        """
+        Получает сущность мема по фильтру.
+
+        :param mem_filter_params: Параметры фильтра.
+        :return: Список отфильтрованных мемов.
+        """
         get_query = select(self.dao)
         filter_query = MemFilter.filter_query(query=get_query, mem_filter_params=mem_filter_params)
         try:

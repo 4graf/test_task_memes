@@ -17,4 +17,10 @@ class MemRepository(BaseRepository[Mem], ABC):
 
     @abstractmethod
     async def get_by_filter(self, mem_filter_params: MemFilterParams) -> Sequence[Mem]:
+        """
+        Получает сущность мема по фильтру.
+
+        :param mem_filter_params: Параметры фильтра.
+        :return: Список отфильтрованных мемов.
+        """
         ...

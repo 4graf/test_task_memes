@@ -83,9 +83,9 @@ class MemService:
 
     async def get_all_memes(self, mem_filter_params: MemFilterParams) -> list[MemReadSchema]:
         """
-        Получает информацию о меме по его идентификатору.
+        Получает информацию о всех мемах по фильтру.
 
-        :return: Список с информациями о мемах.
+        :return: Список с информацией о мемах.
         """
         memes = await self.mem_repository.get_by_filter(mem_filter_params=mem_filter_params)
         return [MemReadSchema.from_entity(mem) for mem in memes]
@@ -97,6 +97,7 @@ class MemService:
         :param data: Данные для обновления мема.
         :param image_stream: Двоичный поток с данными изображения.
         :return: Информация обновленного мема.
+        :raise MemNotFoundException: Обновление мема, который не найден.
         :raise MemExistsException: Добавление мема, который уже существует.
         """
         new_mem = Mem(

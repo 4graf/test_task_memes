@@ -14,6 +14,7 @@ for api_router in api_routers:
 
 async def main():
     CreationHelper.create_image_bucket()
+    await CreationHelper.create_base_admin()
     uvicorn.run(app="main:app", host='0.0.0.0', port=3000, reload=True)
 
 

@@ -6,6 +6,7 @@ from sqlalchemy import Connection
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from app.core.user.infrastructure.models.user_dao import UserDao
 from app.core.mem.infrastructure.models.mem_dao import MemDao
 from app.core.shared_kernel.db.dao import BaseDao
 

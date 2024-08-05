@@ -33,3 +33,22 @@ class RequestParamValidationError(HTTPException):
     def __init__(self, msg='Ошибка валидации параметра.', exception_msg=''):
         super().__init__(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                          detail={"message": f"{msg}: {exception_msg}"})
+
+
+class AccessRightsError(HTTPException):
+    """
+    Ошибка прав доступа.
+    """
+    def __init__(self, msg='Ошибка прав доступа.', exception_msg=''):
+        super().__init__(status_code=status.HTTP_403_FORBIDDEN,
+                         detail={"message": f"{msg}: {exception_msg}"})
+
+
+class AuthenticationUserError(HTTPException):
+    """
+    Ошибка аутентификации.
+    """
+    def __init__(self, msg='Ошибка аутентификации.', exception_msg=''):
+        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED,
+                         detail={"message": f"{msg}: {exception_msg}"})
+
