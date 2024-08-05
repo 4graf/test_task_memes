@@ -9,4 +9,4 @@ class UserRole(Enum):
     Перечисление ролей пользователей.
     """
     ADMIN = "ADMIN"
-    CLIENT = "CLIENT"
+    USER = "USER"

@@ -3,7 +3,7 @@
 """
 
 from dotenv import load_dotenv
-from pydantic import PostgresDsn
+from pydantic import PostgresDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv()
@@ -54,3 +54,18 @@ class AuthenticationSettings(BaseSettings):
     password_salt: str
     iters_hashing: int
     hash_algorithm: str
+
+
+class BaseAdminSettings(BaseSettings):
+    """
+    Настройки для работы с S3 хранилищем с изображенями.
+
+    :cvar bucket_name: Имя бакета с изображениями.
+    """
+    model_config = SettingsConfigDict(env_prefix='admin_')
+
+    login: SecretStr
+    password: SecretStr
+    first_name: str
+    second_name: str
+    email: SecretStr

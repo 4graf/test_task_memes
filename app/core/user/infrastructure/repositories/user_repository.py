@@ -3,8 +3,10 @@
 """
 
 from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
 
 from app.core.shared_kernel.db.repository import BaseDBRepository
+from app.core.shared_kernel.domain.value_objects.user_role import UserRole
 from app.core.user.domain.user_entity import User
 from app.core.user.domain.user_repository import UserRepository
 from app.core.user.infrastructure.models.user_dao import UserDao
@@ -34,3 +36,19 @@ class UserDBRepository(UserRepository, BaseDBRepository[User]):
 
         return result.to_entity() if result else None
 
+    async def get_by_role(self, role: UserRole) -> list[User]:
+        """
+        Получает сущности пользователей по роли.
+
+        :param role: Роль пользователя.
+        :return: Список пользователей.
+        """
+        query = select(self.dao).filter_by(role=role.value)
+
+        try:
+            result = await self.session.execute(query)
+            result = result.scalars().all()
+        except NoResultFound:
+            return []
+
+        return [dao.to_entity() for dao in result]

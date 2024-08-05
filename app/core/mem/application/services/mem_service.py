@@ -85,7 +85,7 @@ class MemService:
         """
         Получает информацию о всех мемах по фильтру.
 
-        :return: Список с информациями о мемах.
+        :return: Список с информацией о мемах.
         """
         memes = await self.mem_repository.get_by_filter(mem_filter_params=mem_filter_params)
         return [MemReadSchema.from_entity(mem) for mem in memes]

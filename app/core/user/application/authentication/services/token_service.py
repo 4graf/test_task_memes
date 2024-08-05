@@ -7,6 +7,7 @@ from uuid import uuid4, UUID
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
 
+from app.core.shared_kernel.domain.value_objects.user_role import UserRole
 from app.core.user.application.authentication.exceptions import TokenExpiredException, TokenCorruptedException
 from app.core.user.application.authentication.schemas.access_token_schema import AccessTokenSchema
 from app.core.user.application.authentication.schemas.refresh_token_schema import RefreshTokenSchema
@@ -30,7 +31,8 @@ class TokenService:
         :return: Токен доступа
         """
         to_encode = data.model_dump()
-        encoded_jwt = cls._create(data=to_encode, expiration=settings.access_expiration,
+        encoded_jwt = cls._create(data=to_encode,
+                                  expiration=settings.access_expiration,
                                   secret_key=settings.access_secret_key)
         return AccessTokenSchema(access_token=encoded_jwt,
                                  token_type="Bearer")
@@ -44,6 +46,7 @@ class TokenService:
         """
         data = cls._decode(token=access_token, secret_key=settings.access_secret_key)
         user = UserFromTokenSchema(uuid=UUID(data['uuid']),
+                                   role=UserRole(data['role']),
                                    token_id=data['token_id'])
         return user
 
@@ -55,7 +58,9 @@ class TokenService:
         :return: Токен обновления
         """
         to_encode = data.model_dump()
-        encoded_jwt = cls._create(data=to_encode, expiration=settings.refresh_expiration, secret_key=settings.refresh_secret_key)
+        encoded_jwt = cls._create(data=to_encode,
+                                  expiration=settings.refresh_expiration,
+                                  secret_key=settings.refresh_secret_key)
         return RefreshTokenSchema(refresh_token=encoded_jwt,
                                   token_type="Bearer")
 
@@ -68,6 +73,7 @@ class TokenService:
         """
         data = cls._decode(token=refresh_token, secret_key=settings.refresh_secret_key)
         user = UserFromTokenSchema(uuid=UUID(data['uuid']),
+                                   role=UserRole(data['role']),
                                    token_id=data['token_id'])
         return user
 

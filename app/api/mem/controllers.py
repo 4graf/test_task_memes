@@ -10,10 +10,12 @@ from fastapi import APIRouter, Depends, UploadFile
 from fastapi.responses import Response
 from starlette import status
 
+from app.api.helpers.user_helper import UserHelper
 from app.api.http_errors import ResourceNotFoundError, ResourceExistsError, RequestParamValidationError
 from app.api.mem.dependencies import get_mem_service
 from app.api.mem.schemas.mem_read_response import MemReadResponse
 from app.api.mem.schemas.mem_update_request import MemUpdateRequest
+from app.api.shared_dependencies import get_current_user_role
 from app.core.mem.application.exceptions import MemNotFoundException, MemExistsException
 from app.core.mem.application.schemas.mem_create_schema import MemCreateSchema
 from app.core.mem.application.schemas.mem_read_schema import MemReadSchema
@@ -21,6 +23,7 @@ from app.core.mem.application.schemas.mem_update_schema import MemUpdateSchema
 from app.core.mem.application.services.mem_service import MemService
 from app.core.mem.domain.exceptions.base_mem_exceptions import MemValidationException
 from app.core.mem.domain.utils.mem_filter_params import MemFilterParams
+from app.core.user.application.authentication.schemas.user_from_token_schema import UserFromTokenSchema
 
 mem_router = APIRouter(prefix='/memes', tags=['Mem'])
 
@@ -103,16 +106,20 @@ async def get_mem_image(id: UUID,
     response_model=MemReadSchema
 )
 async def add_mem(mem_to_add: Annotated[MemCreateSchema, Depends()],
+                  current_user_role: Annotated[UserFromTokenSchema, Depends(get_current_user_role)],
                   mem_service: Annotated[MemService, Depends(get_mem_service)],
                   image_file: UploadFile = None) -> MemReadSchema:
     """
     Маршрут для добавления мема.
 
-    :param mem_service: Сервис для работы с мемами.
     :param mem_to_add: Информация о меме.
+    :param current_user_role: Роль текущего пользователя.
+    :param mem_service: Сервис для работы с мемами.
     :param image_file: Картинка мема.
     :return: Добавленный мем.
     """
+    UserHelper.assert_is_admin(current_user_role)
+
     # Проверку на размер файла надо бы иметь на веб-сервере
     if image_file:
         if image_file.size > 8 * 2**20:
@@ -139,6 +146,7 @@ async def add_mem(mem_to_add: Annotated[MemCreateSchema, Depends()],
 )
 async def update_mem(id: UUID,
                      mem_to_update: Annotated[MemUpdateRequest, Depends()],
+                     current_user_role: Annotated[UserFromTokenSchema, Depends(get_current_user_role)],
                      mem_service: Annotated[MemService, Depends(get_mem_service)],
                      image_file: UploadFile = None) -> MemReadSchema:
     """
@@ -146,10 +154,13 @@ async def update_mem(id: UUID,
 
     :param id: Уникальный идентификатор мема.
     :param mem_to_update: Новая информация о меме.
+    :param current_user_role: Роль текущего пользователя.
     :param mem_service: Сервис для работы с мемами.
     :param image_file: Картинка мема.
     :return: Обновлённый мем.
     """
+    UserHelper.assert_is_admin(current_user_role)
+
     # Проверку на размер файла надо бы иметь на веб-сервере
     if image_file:
         if image_file.size > 8 * 2**20:
@@ -178,13 +189,17 @@ async def update_mem(id: UUID,
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_mem_by_id(id: UUID,
+                           current_user_role: Annotated[UserFromTokenSchema, Depends(get_current_user_role)],
                            mem_service: Annotated[MemService, Depends(get_mem_service)]) -> None:
     """
     Маршрут для удаления мема по его идентификатору.
 
     :param id: Уникальный идентификатор мема.
+    :param current_user_role: Роль текущего пользователя.
     :param mem_service: Сервис для работы с мемами.
     """
+    UserHelper.assert_is_admin(current_user_role)
+
     try:
         await mem_service.delete_mem_by_id(id)
     except MemValidationException as exc:

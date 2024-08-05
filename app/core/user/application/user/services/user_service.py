@@ -1,11 +1,14 @@
 """
 Сервис для работы с пользователями UserService.
 """
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from app.core.shared_kernel.db.exceptions import EntityNotFoundException, EntityExistsException
+from app.core.shared_kernel.domain.value_objects.user_role import UserRole
 from app.core.shared_kernel.domain.value_objects.user_uuid import UserUUID
+from app.core.user.application.authentication.services.password_service import PasswordService
 from app.core.user.application.user.exceptions import UserNotFoundException, UserExistsException
+from app.core.user.application.user.schemas.user_create_schema import UserCreateSchema
 from app.core.user.application.user.schemas.user_read_schema import UserReadSchema
 from app.core.user.application.user.schemas.user_update_schema import UserUpdateSchema
 from app.core.user.domain.user_entity import User
@@ -63,9 +66,20 @@ class UserService:
         """
         Получает информацию о всех пользователях.
 
-        :return: Список с информациями о пользователях.
+        :return: Список с информацией о пользователях.
         """
         users = await self.user_repository.get_all()
+
+        return [UserReadSchema.from_entity(user) for user in users]
+
+    async def get_users_by_role(self, role: UserRole) -> list[UserReadSchema]:
+        """
+        Получает информацию о пользователях с определённой ролью.
+
+        :param role: Роль пользователя.
+        :return: Список с информацией о пользователях.
+        """
+        users = await self.user_repository.get_by_role(role)
 
         return [UserReadSchema.from_entity(user) for user in users]
 
@@ -93,6 +107,30 @@ class UserService:
             await self.user_repository.update(user)
         except EntityNotFoundException as e:
             raise UserNotFoundException from e
+        except EntityExistsException as e:
+            raise UserExistsException from e
+
+        return UserReadSchema.from_entity(user)
+
+    async def create_user(self, data: UserCreateSchema) -> UserReadSchema:
+        """
+        Создаёт пользователя.
+
+        :param data: Данные пользователя.
+        :return: Информация добавленного пользователя.
+        :raise UserExistsException: Добавление пользователя, который уже существует.
+        """
+        user = User(
+            uuid=UserUUID(uuid4()),
+            login=Login(data.login),
+            password_hash=PasswordHash(PasswordService.hash_password(data.password)),
+            email=Email(data.email),
+            name=UserName(first_name=data.name.first_name,
+                          second_name=data.name.second_name),
+            role=UserRole(data.role)
+        )
+        try:
+            await self.user_repository.add(user)
         except EntityExistsException as e:
             raise UserExistsException from e
 
