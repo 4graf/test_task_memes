@@ -75,10 +75,10 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:etc/nginx/nginx.conf
+      - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
-      app:
-        condition: service_healthy
+      - app
+    restart: always
     networks:
       - dev
 
