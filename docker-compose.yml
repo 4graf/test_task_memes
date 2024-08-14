@@ -1,5 +1,8 @@
 version: '3'
 
+networks:
+  dev:
+
 services:
   postgres:
     image: postgres:16.0-alpine
@@ -17,6 +20,8 @@ services:
       - '${POSTGRES_PORT}:${POSTGRES_PORT}'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - dev
 
   s3_storage:
     image: minio/minio:latest
@@ -39,6 +44,8 @@ services:
       - "${S3_CONSOLE_PORT}:${S3_CONSOLE_PORT}"
     volumes:
       - s3_data:/data
+    networks:
+      - dev
 
   app:
     build:
@@ -60,6 +67,20 @@ services:
         condition: service_healthy
     ports:
       - '127.0.0.1:${APP_PORT}:${APP_PORT}'
+    networks:
+      - dev
+
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:etc/nginx/nginx.conf
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - dev
 
 volumes:
   postgres_data:
